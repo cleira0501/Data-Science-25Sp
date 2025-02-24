@@ -167,13 +167,14 @@ df_q1 %>%
 | 1            |  15 |     299808.0 |
 
 **Observations**: - Write your observations here! - Distinctness has a
-positive relationship with the mean velocity. The differnece of mean
-velocity between distincness 3 and 2 is negligible while betwwen 2 and 1
-is a lot bigger. There are also less datapoints for Distinctness 1, so a
-datapoint might alter the mean more than when there are lots of data. -
-Why might your table differ from Michelson’s? - I noticed that all his
-data are integers that are in the 10 accuracy, this made me wonder if
-they rounded their data to the nearest 10.
+positive relationship with the mean velocity. The difference of mean
+velocity between distinctness 3 and 2 is smaller compared to the
+difference between 2 and 1. There are also less data points for
+Distinctness 1, so a data point might alter the mean more than when
+there are lots of data. - Why might your table differ from
+Michelson’s? - I noticed that all his data are integers that are in the
+10 accuracy, this made me wonder if they rounded their data to the
+nearest 10.
 
 The `Velocity` values in the dataset are the speed of light *in air*;
 Michelson introduced a couple of adjustments to estimate the speed of
