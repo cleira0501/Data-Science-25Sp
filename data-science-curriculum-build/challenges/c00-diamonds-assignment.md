@@ -109,11 +109,14 @@ diamonds %>%
 **Observations**: We can observe a positive relationship between carat
 and price. Between 0 and 1 carat, there are a strong correlation between
 price and carat. However, it is clear that as the carat got bigger,
-there are more variance in the price, suggesting that there are other
-factors influencing the price other than carat. We can also see that
-there are a surge of number of data at certain carats suggesting that
-those are popular cutting sizes for diamonds. We can also see that the
-most common sizes of diamonds are under 2.5 carat.
+there are more variance in the price. This suggests 2 possible
+explanation, one possibility is that there are other factors influencing
+the price other than carat, another possibility is that there are there
+are no other factors influencing the price, but the variance between
+prices increased when we increased carat(Heteroskedasticity) We can also
+see that there are a surge of number of data at certain carats
+suggesting that those are popular cutting sizes for diamonds. We can
+also see that the most common sizes of diamonds are under 2.5 carat.
 
 ### **q2** Create a visualization showing variables `carat`, `price`, and `cut` simultaneously. Experiment with which variable you assign to which aesthetic (`x`, `y`, etc.) to find an effective visual.
 
