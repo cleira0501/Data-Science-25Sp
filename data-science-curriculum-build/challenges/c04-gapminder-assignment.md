@@ -103,7 +103,8 @@ you’ll be responsible for doing another cycle of EDA on your own!
 
 ### **q0** Perform your “first checks” on the dataset. What variables are in this
 
-dataset?
+dataset? Country, Continent, Year, Life expectancy, population, gdp per
+capita
 
 ``` r
 ## TASK: Do your "first checks" here!
@@ -216,9 +217,10 @@ highest_gdp_country
 
 ``` r
 min_year_df%>% 
-  filter(country != "Kuwait") %>% 
+  # filter(country != "Kuwait") %>% 
   ggplot(aes(x = continent, y = gdpPercap)) +
-  geom_boxplot()
+  geom_boxplot()+
+  scale_y_log10()
 ```
 
 ![](c04-gapminder-assignment_files/figure-gfm/q2-task-1.png)<!-- -->
@@ -232,21 +234,14 @@ min_year_df%>%
 
 -First of all, because Oceania only has two data points, the box plot
 doesn’t reveal much about its distribution. However, it does have the
-highest median GDP per capita among all continents.Africa and Asia have
-the lowest median GDP per capita, but there’s a key difference between
-them—Asia’s box extends further upward, suggesting a wider range of GDP
-values, while Africa’s box is narrower, with the median sitting near the
-middle, indicating that most African countries have GDP per capita
-values that are more tightly concentrated.Europe has both a long box and
-long whiskers, meaning GDP per capita varies significantly across the
-continent. The median sits right in the middle, suggesting a more evenly
-distributed spread of values. The Americas show a similar pattern, but
-with a narrower box and whiskers, meaning the GDP values are more
-concentrated than in Europe. This could also suggest that there are
-fewer countries in the Americas compared to Europe.There are a few
-outliers in every continent (except Oceania), but what really stands out
-is that even the highest outliers in Africa fall below Europe’s median
-GDP per capita, emphasizing the economic disparity between continents.
+highest median GDP per capita among all continents. Americas has a
+narrow box and whiskers, indicating that the data are more narrowly
+distributed. We see that asia has the widest distribution (long box and
+long whiskers) indicating that the data has high variability. There are
+a few outliers in every continent (except Oceania), but what really
+stands out is that even the highest outliers in Africa fall below
+Europe’s median GDP per capita, emphasizing the economic disparity
+between continents.
 
 **Difficulties & Approaches**:
 
@@ -337,31 +332,27 @@ gapminder %>%
     size = 3
   ) +
   facet_wrap(~ year) + 
-  coord_cartesian(ylim = c(0, 50000))
-```
-
-![](c04-gapminder-assignment_files/figure-gfm/q4-task-1.png)<!-- -->
-
-``` r
+   scale_y_log10()+
   labs(title = "GDP per Capita by Continent (Outliers for Min Year)",
        color = "Country") +
   theme_minimal()
 ```
 
-    ## NULL
+![](c04-gapminder-assignment_files/figure-gfm/q4-task-1.png)<!-- -->
 
 **Observations**:
 
-- To avoid the plot being skewed by Kuwait, I set a y-axis limit to
-  remove it from the left plot. Most of the countries that were outliers
-  are still in the higher GDP per capita range, but now only the US,
-  Canada, South Africa, and Gabon remain as outliers. The others have
-  either fallen within the whiskers or, in the case of countries like
-  Saudi Arabia and Venezuela, have moved to the upper limit of the box.
-  It’s also worth noting that the variance in Asia and Europe has
-  increased significantly, with their boxes and whiskers becoming
-  noticeably longer. The gap between the medians across continents has
-  widened a lot more. This data exhibits heteroscedasticity.
+- Most of the countries that were outliers are still in the higher GDP
+  per capita range, but now only the US, Canada, South Africa, and Gabon
+  remain as outliers. The others have either fallen within the whiskers
+  or, in the case of countries like Saudi Arabia and Venezuela, have
+  moved to the upper limit of the box. It’s also worth noting that the
+  variance in Asia and Africa has increased significantly, with their
+  boxes and whiskers becoming noticeably longer. The gap between the
+  medians across continents has widened. This data exhibits
+  heteroskedasticity across time within continent, we see this effect
+  especially in asia and africa as their data become even more scattered
+  over the years.
 
 # Your Own EDA
 
@@ -376,18 +367,140 @@ the relationship between variables, or something else entirely.
 
 ``` r
 ## TASK: Your first graph
+gapminder %>% 
+  filter(year == year_min) %>% 
+  ggplot(aes(x = continent, y = lifeExp))+
+  geom_boxplot()+
+  labs(title = "Life expectancy by Continent 1952")+
+      geom_point(
+    data = . %>%
+      filter(country %in% c("Reunion","Gambia", "Turkey", "Norway", "Canada", "Haiti", "Israel", "Afghanistan")),
+    aes(color = country),  
+    size = 3
+  ) +
+  theme_minimal()
 ```
 
-- (Your notes and observations here)
+![](c04-gapminder-assignment_files/figure-gfm/q5-task1-1.png)<!-- -->
+
+``` r
+max_year_df <- gapminder %>% 
+  filter(year == year_max)
+ordered <-min_year_df %>% 
+  filter(continent == "Asia") %>% # switch continents
+  arrange(desc(lifeExp))
+ordered
+```
+
+    ## # A tibble: 33 × 6
+    ##    country          continent  year lifeExp      pop gdpPercap
+    ##    <fct>            <fct>     <int>   <dbl>    <int>     <dbl>
+    ##  1 Israel           Asia       1952    65.4  1620914     4087.
+    ##  2 Japan            Asia       1952    63.0 86459025     3217.
+    ##  3 Hong Kong, China Asia       1952    61.0  2125900     3054.
+    ##  4 Singapore        Asia       1952    60.4  1127000     2315.
+    ##  5 Taiwan           Asia       1952    58.5  8550362     1207.
+    ##  6 Sri Lanka        Asia       1952    57.6  7982342     1084.
+    ##  7 Lebanon          Asia       1952    55.9  1439529     4835.
+    ##  8 Kuwait           Asia       1952    55.6   160000   108382.
+    ##  9 Bahrain          Asia       1952    50.9   120447     9867.
+    ## 10 Thailand         Asia       1952    50.8 21289402      758.
+    ## # ℹ 23 more rows
+
+``` r
+#"Reunion","Gambia", "Turkey", "Norway", "Canada", "Haiti", "Israel", "Afghanistan"
+```
+
+- We can observe that there is a lot of spread in the data in americas
+  and asia(by their long boxes an whiskers). I wanted to see the
+  countries with the longest life expectancy and shortest in their
+  continent so I found them by inspecting the data and marked them out.
+  If we compare this graph to the gdp per capita in 1952, we can see
+  almost identical patterns. Which suggests that there exists some
+  degree of positive relationship between life expectancy and gdp per
+  capita.
 
 ``` r
 ## TASK: Your second graph
+gapminder %>% 
+  filter(year == year_max) %>% 
+  ggplot(aes(x = continent, y = lifeExp))+
+  geom_boxplot()+
+    geom_point(
+    data = . %>%
+      filter(country %in% c("Reunion","Gambia", "Turkey", "Norway", "Canada", "Haiti", "Israel", "Afghanistan")),
+    aes(color = country),  
+    size = 3
+  ) +
+  labs(title = "Life expectancy by Continent 2007")+
+  theme_minimal()
 ```
 
-- (Your notes and observations here)
+![](c04-gapminder-assignment_files/figure-gfm/q5-task2-1.png)<!-- -->
+
+- Compared to the 1952 data, the spread of life expectancy decreased
+  across all continents except Africa. Their boxes and whiskers both
+  became shorter, meaning life expectancy became more concentrated.
+  Despite this, every continent saw an overall increase in mean life
+  expectancy. The countries with the highest and lowest life expectancy
+  within each continent mostly stayed in the same position, except for
+  Gambia, which climbed to the upper edge of the box. The wide spread in
+  Africa’s life expectancy suggests a big disparity in resource
+  distribution.
 
 ``` r
 ## TASK: Your third graph
+life_exp_diff <- gapminder %>%
+  filter(year %in% c(1952, 2007)) %>%
+  select(lifeExp, year, country, continent) %>% 
+  spread(year, lifeExp) %>% 
+  mutate(lifeExp_change = `2007` - `1952`)
+life_exp_diff %>% 
+  arrange(lifeExp_change)
 ```
 
-- (Your notes and observations here)
+    ## # A tibble: 142 × 5
+    ##    country          continent `1952` `2007` lifeExp_change
+    ##    <fct>            <fct>      <dbl>  <dbl>          <dbl>
+    ##  1 Zimbabwe         Africa      48.5   43.5         -4.96 
+    ##  2 Swaziland        Africa      41.4   39.6         -1.79 
+    ##  3 Zambia           Africa      42.0   42.4          0.346
+    ##  4 Lesotho          Africa      42.1   42.6          0.454
+    ##  5 Botswana         Africa      47.6   50.7          3.11 
+    ##  6 South Africa     Africa      45.0   49.3          4.33 
+    ##  7 Rwanda           Africa      40     46.2          6.24 
+    ##  8 Liberia          Africa      38.5   45.7          7.20 
+    ##  9 Congo, Dem. Rep. Africa      39.1   46.5          7.32 
+    ## 10 Norway           Europe      72.7   80.2          7.53 
+    ## # ℹ 132 more rows
+
+``` r
+life_exp_diff %>%   
+  ggplot(aes(x = continent, y = lifeExp_change)) +
+  geom_boxplot() +
+      geom_point(
+    data = . %>%
+      filter(country %in% c("Reunion","Gambia", "Turkey", "Norway", "Canada", "Haiti", "Israel", "Afghanistan")),
+    aes(color = country),  
+    size = 3
+  ) +
+  labs(title = "Life expectancy change by Continent between 1952 & 2007") +
+  theme_minimal()
+```
+
+![](c04-gapminder-assignment_files/figure-gfm/q5-task3-1.png)<!-- -->
+
+- I plotted the difference of life expectancy between 1952 and 2007. I
+  immediately noticed that there are countries that had negative life
+  expectancy change. I went back and inspected the data and found that
+  they are zimbabwe and swaziland( i wonder why). Interestingly, we see
+  that except Reunion, all the top performing countries in life
+  expectancy actually are on the lower end of change in life expectancy.
+  This makes sense because there are a limit to which how long humans
+  can live (should plateau out at around 80). I also want to point out
+  that although Turkey has the shortest life expectancy both 1952 and
+  2007, it is the outlier in Europe which they gained the most years in
+  life expectancy in Europe. On the contrary, Afghanistan gained little
+  life expectancy and became an outliar in 2007 life expectancy. Asia
+  gained the most median life expectancy, I wonder if this indicates
+  that Asia experienced the most economic boom.
