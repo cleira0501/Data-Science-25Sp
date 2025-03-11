@@ -213,10 +213,10 @@ your other visuals.
 ``` r
 # WRITE YOUR CODE HERE
 df_long %>% 
-  ggplot( aes(x = bacteria, y = MIC, fill = antibiotics, color = gram)) +
+  ggplot( aes(x = bacteria, y = MIC, fill = antibiotics)) +
   geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~ gram, drop = TRUE, scales = "free_x")+
   scale_y_log10() +
-  scale_color_manual(values = c("positive" = "blue", "negative" = "red")) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
@@ -235,13 +235,11 @@ your other visuals.
 ``` r
 # WRITE YOUR CODE HERE
 df_long %>% 
-  filter(antibiotics == "penicillin") %>% 
-  ggplot(aes(x = bacteria, y = MIC, fill = gram))+
-  geom_bar(stat = "identity")+
+  ggplot(aes(x =  antibiotics, y = MIC, group = bacteria, color = gram))+
+  geom_line()+
+  geom_point()+
   scale_y_log10()+
-  theme_minimal() +
-  labs(title = "MIC values across bactaerias with penicillin")+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_minimal() 
 ```
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q1.3-1.png)<!-- -->
@@ -258,18 +256,13 @@ your other visuals.
 ``` r
 # WRITE YOUR CODE HERE
 df_long %>% 
-  filter(antibiotics == "streptomycin") %>% 
-  ggplot(aes(x = bacteria, y = MIC, fill = gram))+
-  geom_bar(stat = "identity")+
-  scale_y_log10()+
-  theme_minimal() +
-  labs(title = "MIC values across bactaerias with streptomycin")+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  ggplot(aes(x = antibiotics, y = bacteria, fill = log10(MIC)))+
+  geom_tile() +
+  theme_minimal() 
 ```
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q1.4-1.png)<!-- -->
-
-#### Visual 5 (Some variables)
+\#### Visual 5 (Some variables)
 
 In this visual you may show a *subset* of the variables (`penicillin`,
 `streptomycin`, `neomycin`, `gram`), but you must still show *all 16
@@ -281,129 +274,14 @@ your other visuals.
 ``` r
 # WRITE YOUR CODE HERE
 df_long %>% 
-  filter(antibiotics == "neomycin") %>% 
-  ggplot(aes(x = bacteria, y = MIC, fill = gram))+
-  geom_bar(stat = "identity")+
-  scale_y_log10()+
-  theme_minimal() +
-  labs(title = "MIC values across bactaerias with neomycin")+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  filter(antibiotics == "penicillin") %>% 
+  ggplot(aes(x = gram, y = log10(MIC)))+
+  geom_point(size = 3) +
+  labs(title = "penicillin MIC value vs gram type")+
+  theme_minimal() 
 ```
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q1.5-1.png)<!-- -->
-
-``` r
-df_long %>% 
-  ggplot(aes(x = antibiotics, y = MIC, color = bacteria))+
-  scale_y_log10()+
-  geom_point(size = 3, position = position_jitter(width = 0.2, height = 0))
-```
-
-![](c05-antibiotics-assignment_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
-
-``` r
-# Convert data to wide format for PCA
-bacteria_pca <- df_long %>%
-  select(bacteria, antibiotics, MIC) %>%
-  spread(key = antibiotics, value = MIC)
-bacteria_pca
-```
-
-    ## # A tibble: 16 × 4
-    ##    bacteria                        neomycin penicillin streptomycin
-    ##    <chr>                              <dbl>      <dbl>        <dbl>
-    ##  1 Aerobacter aerogenes               1.6      870             1   
-    ##  2 Bacillus anthracis                 0.007      0.001         0.01
-    ##  3 Brucella abortus                   0.02       1             2   
-    ##  4 Diplococcus pneumonia             10          0.005        11   
-    ##  5 Escherichia coli                   0.1      100             0.4 
-    ##  6 Klebsiella pneumoniae              1        850             1.2 
-    ##  7 Mycobacterium tuberculosis         2        800             5   
-    ##  8 Proteus vulgaris                   0.1        3             0.1 
-    ##  9 Pseudomonas aeruginosa             0.4      850             2   
-    ## 10 Salmonella (Eberthella) typhosa    0.008      1             0.4 
-    ## 11 Salmonella schottmuelleri          0.09      10             0.8 
-    ## 12 Staphylococcus albus               0.001      0.007         0.1 
-    ## 13 Staphylococcus aureus              0.001      0.03          0.03
-    ## 14 Streptococcus fecalis              0.1        1             1   
-    ## 15 Streptococcus hemolyticus         10          0.001        14   
-    ## 16 Streptococcus viridans            40          0.005        10
-
-``` r
-# Perform PCA (excluding bacteria column)
-pca_result <- prcomp(bacteria_pca[, -1], scale. = TRUE)#excludes the first column of bacteria names 
-#prcomp: function for priciple component analysis
-
-# Create a dataframe for plotting
-pca_df <- data.frame(bacteria = bacteria_pca$bacteria, #adds the bacteria names back
-                     PC1 = pca_result$x[, 1], #extracts first pca vector 
-                     PC2 = pca_result$x[, 2], #extracts second
-                     gram = df_long$gram[match(bacteria_pca$bacteria, df_long$bacteria)])  # Add Gram type back
-pca_df
-```
-
-    ##                           bacteria        PC1         PC2     gram
-    ## 1             Aerobacter aerogenes -0.9578654  1.52888294 negative
-    ## 2               Bacillus anthracis -0.5731209 -0.78205432 positive
-    ## 3                 Brucella abortus -0.2749643 -0.67396781 negative
-    ## 4            Diplococcus pneumonia  1.7485195 -0.05183599 positive
-    ## 5                 Escherichia coli -0.5820740 -0.50315172 negative
-    ## 6            Klebsiella pneumoniae -0.9537631  1.47917450 negative
-    ## 7       Mycobacterium tuberculosis -0.2802382  1.56672423 negative
-    ## 8                 Proteus vulgaris -0.5555620 -0.76820466 negative
-    ## 9           Pseudomonas aeruginosa -0.8745372  1.51259914 negative
-    ## 10 Salmonella (Eberthella) typhosa -0.5153844 -0.75883123 negative
-    ## 11       Salmonella schottmuelleri -0.4565649 -0.71332191 negative
-    ## 12            Staphylococcus albus -0.5600531 -0.77736455 positive
-    ## 13           Staphylococcus aureus -0.5705529 -0.78101044 positive
-    ## 14           Streptococcus fecalis -0.4193092 -0.72570692 positive
-    ## 15       Streptococcus hemolyticus  2.1977884  0.10693824 positive
-    ## 16          Streptococcus viridans  3.6276816  0.34113052 positive
-
-``` r
-# Plot PCA results
-ggplot(pca_df, aes(x = PC1, y = PC2, color = gram, label = bacteria)) +
-  geom_point(size = 3) +
-  geom_text_repel(size = 3, max.overlaps = 20) +  # Prevent text overlap
-  # geom_text(vjust = 1, hjust = 1, size = 3) +
-  labs(title = "PCA of Bacteria Based on MIC Values",
-       x = "Principal Component 1",
-       y = "Principal Component 2",
-       color = "Gram Type") +
-  theme_minimal()
-```
-
-![](c05-antibiotics-assignment_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
-
-``` r
-library(ggplot2)
-library(ggrepel)
-
-# Define target bacteria
-target_bacteria <- c("Streptococcus fecalis", "Diplococcus pneumonia")
-
-# Create a new column for highlighting (keep original Gram colors for others)
-pca_df$highlight <- ifelse(pca_df$bacteria %in% target_bacteria, pca_df$bacteria, pca_df$gram)
-
-# Define custom colors for the two bacteria, keeping others unchanged
-custom_colors <- c("Streptococcus fecalis" = "blue", 
-                   "Diplococcus pneumonia" = "red", 
-                   "positive" = "darkorange",  # Default color for Gram-positive
-                   "negative" = "purple")      # Default color for Gram-negative
-
-# Plot
-ggplot(pca_df, aes(x = PC1, y = PC2, label = bacteria, color = highlight)) +
-  geom_point(size = 3) +  
-  geom_text_repel(size = 3, max.overlaps = 20) +  
-  scale_color_manual(values = custom_colors) +  # Apply custom colors only to target bacteria
-  labs(title = "PCA of Bacteria Based on MIC Values",
-       x = "Principal Component 1",
-       y = "Principal Component 2",
-       color = "Bacteria Type") +
-  theme_minimal()
-```
-
-![](c05-antibiotics-assignment_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 ### **q2** Assess your visuals
 
@@ -424,32 +302,28 @@ opportunity to think about why this is.**
 > How do the three antibiotics vary in their effectiveness against
 > bacteria of different genera and Gram stain?
 
-*Observations* - What is your response to the question above?
--*penicillin*: We can see that in the bar plot with penicillin isolated,
-if we make MIC value 1 the bases of comparison, all bacteria gram type
-negative has higher MIC values while all bacteria gram type positive has
-lower MIC values. This tells me that bacteria gram type negative is more
-resistant to *penicillin* than type positive. -*streptomycin*: For
-streptomycin, I’d say there isn’t a very obvious relationship between
-Gram type and MIC values. However, I did notice that Gram-negative
-bacteria tend to have more stable MIC values, mostly fluctuating around
-1, while Gram-positive bacteria show greater variation. This suggests
-that streptomycin might generally be more effective against
-Gram-negative bacteria, though the trend isn’t entirely clear.
--*neomycin*: If we once again make MIC value 1 our basis of comparison,
-we can see that neomycin is generally effective across the board (with a
-couple of exceptions) especially in the staphyloccocus group. I also
-don’t see much correlation between the gram type and the MIC values.
-
-- Which of your visuals above (1 through 5) is **most effective** at
-  helping to answer this question?
-  - 3 4 and 5 where I isolated the three different antibiotic tested in
-    plotting.
-- Why?
-  - It is easier to see the relationship between gram types and
-    different antibiotics because there are less information presented
-    at once and less prone to being overwhelmed by all the
-    information(plot 1 and 2).
+*Observations* - What is your response to the question above? -
+Penicillin: In most cases, penicillin is less effective against
+Gram-negative bacteria, as indicated by their higher MIC values.
+However, it is notably more effective against a subset of Gram-positive
+bacteria, particularly the Streptococcus group, where it outperforms the
+other antibiotics. - Streptomycin: There is no strong, consistent
+relationship between Gram type and MIC values for streptomycin. However,
+excluding the Streptococcus group, Gram-negative bacteria generally
+exhibit higher MIC values than Gram-positive bacteria, suggesting that
+streptomycin is less effective against Gram-negative bacteria. -
+Neomycin: Similar to streptomycin, Gram-negative bacteria tend to have
+higher MIC values than Gram-positive bacteria, though not in every case.
+The trends observed for neomycin resemble those of streptomycin more
+closely than penicillin, further suggesting that neomycin is generally
+less effective against Gram-negative bacteria. - Which of your visuals
+above (1 through 5) is **most effective** at helping to answer this
+question? - 3, the line plot, and I used the tile plot to reference the
+group that has distinct behaviors(the Streptococcus group) - Why? - The
+line plot \]highlights the relationship between gram type and antibiotic
+effectiveness by focusing on overall trends in MIC values, rather than
+individual bacterial species. This makes it easier to identify patterns
+across different antibiotics than getting overwhelmed.
 
 #### Guiding Question 2
 
@@ -460,28 +334,21 @@ and in 1984 *Streptococcus fecalis* was renamed *Enterococcus fecalis*
 > Why was *Diplococcus pneumoniae* was renamed *Streptococcus
 > pneumoniae*?
 
-*Observations* - What is your response to the question above? - Ok so at
-first when I was reading the question I understood that I will probably
-have to derive some sort of clustering between the bacteria based on
-their MIC values to different antibiotics. I tried by using scatter plot
-with the x axis being different antibiotics and the y axis with the MIC
-values, it was very ahrd to see any relationships and grouping because
-there were too many bacteria. I guess you can sort of see some bacteria
-having similar reactions to antibiotics in plot 2 of the bar plot,
-however I am still not getting the clustering and clear mapping of
-groups of bacteria I wanted to get. I ultimately consulted chatgpt for
-PCA and it produced the PCA plots. I went and understood every single
-line of code and added comments. We can hypothesize that the reason why
-*Diplococcus pneumoniae* was renamed *Streptococcus pneumoniae* is
-because that in our PCA plot you can see that Diplococcus pneumoniae is
-clustering with *Streptococcus hemolyticus* and *Streptococcus
-viridans*. This suggests that *Diplococcus pneumonia* shares structural
-or behavioral similarities with the *Streptococcus* group, which might
+*Observations* - What is your response to the question above? - We can
+hypothesize that the reason why *Diplococcus pneumoniae* was renamed
+*Streptococcus pneumoniae* is because that in the tile plot we can see
+that the MIC values of *Diplococcus pneumonia* is exhibiting patterns
+similar to *Streptococcus hemolyticus* and *Streptococcus viridans*.
+This suggests that *Diplococcus pneumonia* shares structural or
+behavioral similarities with the *Streptococcus* group, which might
 explain why it was reclassified as *Streptococcus pneumoniae*. - Which
 of your visuals above (1 through 5) is **most effective** at helping to
-answer this question? - I would say the PCA plots were the most
-helpful. - Why? - Because it directly shows the clustering between
-bacteria of how similarly they reacted to different antibiotics.
+answer this question? - I would say the Tile plot(plot 4) - Why? -
+Because the color scale made it fairly easy to distinguish the trend of
+MIC values for differnet antibiotic groups. We can see that there are
+bacteria showing patterns such as light/dark/light or dark/light/dark
+across *neomycin*, *penicillin* and *streptomycin*, making
+grouping/categorizing different bacteria easier.
 
 # References
 
