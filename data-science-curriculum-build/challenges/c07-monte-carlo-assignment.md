@@ -250,7 +250,12 @@ Answer the questions below.
 ``` r
 ## TASK: Finish implementing this function
 stat <- function(x, y) {
-  # TODO: Finish implementing this function
+  if (x^2 +y^2 <= 1){
+    return(4)
+  }
+  else{
+    return(0)
+  }
 }
 ```
 
@@ -261,35 +266,47 @@ implementation of `stat()`, *but* they should also be *correct*.
 # ## TASK: Finish writing these assert statements
 # 
 # # Check the value for points *inside* the circle
-# assertthat::assert_that(
-#   # tibble(x = ?, y = ?) %>% # Pick a point *inside* the circle
-#     mutate(stat = stat(x, y)) %>% 
-#     pull(stat) %>% 
-#     .[[1]] == 4,
-#   # ???, # Write the correct value of stat() here
-#   msg = "Incorrect value when a point is inside the circle"
-# )
-# 
-# # Check the value for points *outside* the circle
-# assertthat::assert_that(
-#   # tibble(x = ?, y = ?) %>% # Pick a point *outside* the circle
-#     mutate(stat = stat(x, y)) %>% 
-#     pull(stat) %>% 
-#     .[[1]] == 6,
-#   # ???, # Write the correct value of stat() here
-#   msg = "Incorrect value when a point is outside the circle"
-# )
-# print("Your assertions passed, but make sure they're checking the right thing!")
+assertthat::assert_that(
+    tibble(x = 0.5, y = 0.5) %>% # Pick a point *inside* the circle
+    mutate(stat = stat(x, y)) %>%
+    pull(stat) %>%
+    .[[1]] == 4,# Write the correct value of stat() here
+  msg = "Incorrect value when a point is inside the circle"
+)
 ```
+
+    ## [1] TRUE
+
+``` r
+# Check the value for points *outside* the circle
+assertthat::assert_that(
+    tibble(x = 1, y = 0.5) %>% # Pick a point *outside* the circle
+    mutate(stat = stat(x, y)) %>%
+    pull(stat) %>%
+    .[[1]] == 0, # Write the correct value of stat() here
+  msg = "Incorrect value when a point is outside the circle"
+)
+```
+
+    ## [1] TRUE
+
+``` r
+print("Your assertions passed, but make sure they're checking the right thing!")
+```
+
+    ## [1] "Your assertions passed, but make sure they're checking the right thing!"
 
 *Observations*
 
 - You chose a correct value of `stat(x, y)` when `x, y` is *outside* the
   circle. Why did you choose this value?
-  - (Justify your value here)
+  - I chose 0 because points that are outside the circle does not
+    contribute to the estimation of pi.
 - You chose a correct value of `stat(x, y)` when `x, y` is *inside* the
   circle. Why did you choose this value?
-  - (Justify your value here)
+  - because we are doing a quarter of a circle and the equation shown
+    above states that pi approximates to 4 \* the number of points lying
+    inside the circle/the total points.
 
 ### **q3** Estimate $\pi$
 
@@ -297,11 +314,17 @@ Using your data in `df_q1`, estimate $\pi$.
 
 ``` r
 ## TASK: Estimate pi using your data from q1
-# df_q3 <- 
-#   df_q1 %>% 
-#   # TODO: Estimate pi as the column `pi_est`
-# df_q3
+df_q3 <-
+  df_q1 %>%
+  mutate(data = mapply(stat,x, y)) %>% 
+  summarize(pi_est = mean(data))
+df_q3
 ```
+
+    ## # A tibble: 1 × 1
+    ##   pi_est
+    ##    <dbl>
+    ## 1   3.15
 
 Use the following to check that you’ve used the correct variable names.
 (NB. This does not check correctness.)
@@ -309,18 +332,30 @@ Use the following to check that you’ve used the correct variable names.
 ``` r
 ## NOTE: Do not edit this code
 # Correct sample size
-# assertthat::assert_that(
-#   dim(df_q3) %>% 
-#     .[[1]] == 1,
-#   msg = "This result should have just one row"
-# )
-# # Correct column names
-# assertthat::assert_that(
-#   setequal(names(df_q3), c("pi_est")),
-#   msg = "df_q3 must include the column `pi_est`"
-# )
-# print("Good")
+assertthat::assert_that(
+  dim(df_q3) %>%
+    .[[1]] == 1,
+  msg = "This result should have just one row"
+)
 ```
+
+    ## [1] TRUE
+
+``` r
+# Correct column names
+assertthat::assert_that(
+  setequal(names(df_q3), c("pi_est")),
+  msg = "df_q3 must include the column `pi_est`"
+)
+```
+
+    ## [1] TRUE
+
+``` r
+print("Good")
+```
+
+    ## [1] "Good"
 
 ## Quantifying Uncertainty
 
@@ -338,33 +373,36 @@ estimate. Answer the questions below.
 
 ``` r
 ## TASK: Finish the code below
-# df_q4 <- 
-#   df_q1 %>% 
-#   bootstraps(., times = 1000) %>% 
-#   mutate(
-#     pi_est = map_dbl(
-#       splits,
-#       function(split_df) {
-#         analysis(split_df) %>% 
-#           # Estimate pi (pi_est) using the resampled data;
-#           # this should be *identical* to the
-#           # code you wrote for q3
-#           pull(pi_est)
-#       }
-#     )
-#   )
-# 
-# ## NOTE: Do not edit; use this to visualize your results
-# df_q4 %>% 
-#   ggplot(aes(pi_est)) +
-#   geom_histogram()
+df_q4 <-
+  df_q1 %>%
+  bootstraps(., times = 1000) %>%
+  mutate(
+    pi_est = map_dbl(
+      splits,
+      function(split_df) {
+        analysis(split_df) %>%
+          mutate(data = mapply(stat,x, y)) %>% 
+          summarize(pi_est = mean(data)) %>% 
+          pull(pi_est)
+      }
+    )
+  )
+
+## NOTE: Do not edit; use this to visualize your results
+df_q4 %>%
+  ggplot(aes(pi_est)) +
+  geom_histogram()
 ```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+![](c07-monte-carlo-assignment_files/figure-gfm/q4-task-1.png)<!-- -->
 
 *Observations*
 
 - What is a range of plausible values, based on the sampling
   distribution you’ve generated?
-  - (Your response here)
+  - somewhere from 3 to around 3.15
 
 ### **q5** Bootstrap percentile confidence interval
 
@@ -376,16 +414,21 @@ level (`alpha = 0.05`).
 
 ``` r
 ## TASK: Compute a bootstrap confidence interval at the 95% level (alpha = 0.05)
-# df_q5 <- 
-#   df_q4 %>% 
-#   summarize(
-#     # TODO: Compute pi_lo and pi_up
-#     # pi_lo = ?
-#     # pi_up = ?
-#   )
-# 
-# df_q5
+df_q5 <-
+  df_q4 %>%
+  summarize(
+    pi_lo = quantile(pi_est, probs = .025),
+    pi_up = quantile(pi_est, probs = .975),
+    pi_mid = quantile(pi_est, probs = .5)
+  )
+
+df_q5
 ```
+
+    ## # A tibble: 1 × 3
+    ##   pi_lo pi_up pi_mid
+    ##   <dbl> <dbl>  <dbl>
+    ## 1  3.12  3.18   3.15
 
 ### **q6** CLT confidence interval
 
@@ -401,25 +444,46 @@ in both q5 and q6. If they disagree strongly, that suggests that you’ve
 done something *wrong* in one of the tasks….
 
 ``` r
-# df_q1 %>%
+df_q1 %>% 
+  mutate(circle = mapply(stat,x,y))%>%
+  summarize(
+    pi_est = mean(circle),
+    se = sd(circle)/sqrt(n),
+    pi_lower = pi_est - qnorm(0.975)*se,
+    pi_upper = pi_est + qnorm(0.975)*se
+  )
 ```
+
+    ## # A tibble: 1 × 4
+    ##   pi_est     se pi_lower pi_upper
+    ##    <dbl>  <dbl>    <dbl>    <dbl>
+    ## 1   3.15 0.0164     3.12     3.18
 
 **Observations**:
 
 - Does your intervals include the true value of $\pi$?
-  - (Bootstrap CI: yes or no?)
-  - (CLT CI: yes or no?)
+  - (Bootstrap CI: yes or no?) No
+  - (CLT CI: yes or no?) Yes
 - How closely do your bootstrap CI and CLT CI agree?
-  - (Your answer here)
+  - The mean aligns fairly closely with bootstrap having 3.1008 and CLT
+    having 3.1024. However CLT does have a lot more variation compared
+    to bootstrap if we observe their upper and lower bound of the 95%
+    confidence level.
 - Comment on the width of your CI(s). Would your estimate of $\pi$ be
   good enough for roughly estimating an area (e.g., to buy enough paint
   for an art project)? Would your estimate of $\pi$ be good enough for
   precisely calculating a trajectory (e.g., sending a rocket into
   orbit)?
-  - (Good enough as a rough estimate?)
-  - (Good enough as a precise estimate?)
+  - Width of bootstrap is a lot narrower than the CLT(range is within
+    0.06 between upper and lower bound values) , in contrast to CLT’s
+    range is around 0.9.
+  - (Good enough as a rough estimate?) Yes it is good enough for a rough
+    estimate
+  - (Good enough as a precise estimate?) No it’s still not accurate
+    enough to do use this result to calculate anything that needs
+    accuracy.
 - What would be a *valid* way to make your CI more narrow?
-  - (Your answer here)
+  - Having a whole lot more observations.
 
 # References
 
