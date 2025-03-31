@@ -584,7 +584,7 @@ glimpse(df_normalized)
 
 ``` r
 df_normalized %>% 
-    filter(!is.na(cases_per100k) & !is.na(deaths_per100k)) %>% 
+    filter(!is.na(cases_per100k) & !is.na(deaths_per100k) & date == "2022-05-11") %>% 
   summarise(
     mean_cases_per100k = mean(cases_per100k, na.rm = TRUE),
     sd_cases_per100k = sd(cases_per100k, na.rm = TRUE),
@@ -596,14 +596,18 @@ df_normalized %>%
     ## # A tibble: 1 × 4
     ##   mean_cases_per100k sd_cases_per100k mean_deaths_per100k sd_deaths_per100k
     ##                <dbl>            <dbl>               <dbl>             <dbl>
-    ## 1             10094.            8484.                174.              159.
+    ## 1             24934.            6167.                375.              160.
 
 - Which rows did you pick?
-  - I excluded all rows with NA(missing) values.
+  - I excluded all rows with NA(missing) values. And I picked 2022/05/11
+    as my date to focus on because I found in q7 that that’s one of the
+    days where the peak cases/100k happened.
 - Why?
   - Because the counties with NA values still gets added to the total
     counties count, however, their population is being treated as 0
-    which skews up the data during calculation.
+    which skews up the data during calculation. I thought it would be
+    interesting to see the mean and sd of one of the days where the peak
+    number of cases occurred.
 
 ### **q7** Find and compare the top 10
 
@@ -680,6 +684,17 @@ top_10_deaths
     the timing of these peaks was much more scattered. In contrast, the
     peak cases were tightly concentrated, happening primarily in those
     few days in May.
+- Comparing mean from q6:
+  - The mean cases per 100k from Q6 was 24,934, while the mean deaths
+    per 100k was 375. When comparing this to the top 10 counties with
+    the highest cases per 100k, we see that even the 10th-ranked county
+    has nearly double the mean cases from Q6. This is expected because
+    the mean from Q6 accounts for all counties, whereas the top 10
+    counties are specifically those with the highest case rates. These
+    extreme values lie in the “tail” of the distribution. The same
+    pattern holds when comparing the mean deaths per 100k from Q6 to the
+    top 10 counties with the highest death rates per 100k. These
+    counties represent outliers in the overall distribution.
 
 ## Self-directed EDA
 
