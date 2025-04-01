@@ -324,7 +324,7 @@ df_q3
     ## # A tibble: 1 × 1
     ##   pi_est
     ##    <dbl>
-    ## 1   3.15
+    ## 1   3.12
 
 Use the following to check that you’ve used the correct variable names.
 (NB. This does not check correctness.)
@@ -402,7 +402,7 @@ df_q4 %>%
 
 - What is a range of plausible values, based on the sampling
   distribution you’ve generated?
-  - somewhere from 3 to around 3.15
+  - somewhere from 3.09 to 3.20
 
 ### **q5** Bootstrap percentile confidence interval
 
@@ -428,7 +428,7 @@ df_q5
     ## # A tibble: 1 × 3
     ##   pi_lo pi_up pi_mid
     ##   <dbl> <dbl>  <dbl>
-    ## 1  3.12  3.18   3.15
+    ## 1  3.09  3.16   3.12
 
 ### **q6** CLT confidence interval
 
@@ -457,26 +457,22 @@ df_q1 %>%
     ## # A tibble: 1 × 4
     ##   pi_est     se pi_lower pi_upper
     ##    <dbl>  <dbl>    <dbl>    <dbl>
-    ## 1   3.15 0.0164     3.12     3.18
+    ## 1   3.12 0.0166     3.09     3.16
 
 **Observations**:
 
 - Does your intervals include the true value of $\pi$?
-  - (Bootstrap CI: yes or no?) No
+  - (Bootstrap CI: yes or no?) Yes
   - (CLT CI: yes or no?) Yes
 - How closely do your bootstrap CI and CLT CI agree?
-  - The mean aligns fairly closely with bootstrap having 3.1008 and CLT
-    having 3.1024. However CLT does have a lot more variation compared
-    to bootstrap if we observe their upper and lower bound of the 95%
-    confidence level.
+  - The mean aligns very closely with bootstrap having 3.14 and CLT
+    having 3.1404. Their upper and lower bound also allign very closely.
 - Comment on the width of your CI(s). Would your estimate of $\pi$ be
   good enough for roughly estimating an area (e.g., to buy enough paint
   for an art project)? Would your estimate of $\pi$ be good enough for
   precisely calculating a trajectory (e.g., sending a rocket into
   orbit)?
-  - Width of bootstrap is a lot narrower than the CLT(range is within
-    0.06 between upper and lower bound values) , in contrast to CLT’s
-    range is around 0.9.
+  - Width of bootstrap and CLT both have a range of around 0.07
   - (Good enough as a rough estimate?) Yes it is good enough for a rough
     estimate
   - (Good enough as a precise estimate?) No it’s still not accurate
