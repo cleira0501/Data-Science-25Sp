@@ -130,7 +130,9 @@ you still need to count, because your numbers *will* be different!
   - 97
 - Are there any sources of *real* uncertainty in the percent occupied
   you calculated?
-  - No, unless the houses were misclassified as empty or occupied.
+  - Yes, because people can die and move around, if the data is not
+    updated real time, then it is possible that in a house that someone
+    recently moved is still represented as occupied vice versa.
 - Are there any sources of *erroneous* uncertainty in the percent
   occupied you calculated?
   - Yes, I only counted once and I might miscalculated (over counted or
