@@ -792,11 +792,138 @@ States: Pose your own question and try to answer it with the data.
 
 ``` r
 ## TODO: Pose and answer your own question about the data
+df_plot <- df_q3 %>%
+  filter(str_detect(geographic_area_name, "Massachusetts")) %>%
+  mutate(
+    county = str_remove(geographic_area_name, " County,.*$"),
+    family_size = as.numeric(str_extract(category, "^\\d+")),
+    income_per_person = income_estimate / family_size
+  ) %>%
+  group_by(county) %>%
+  mutate(
+    income_2_person = income_estimate[category == "2-person families"],
+    predicted_income_per_person = income_2_person / family_size,
+    difference = income_per_person - predicted_income_per_person
+  ) %>%
+  ungroup() %>%
+  mutate(
+    county = fct_reorder(county, income_per_person, .na_rm = TRUE)
+  )
+
+ggplot(df_plot, aes(x = county)) +
+  geom_point(
+    aes(y = income_per_person, color = category),
+    size = 3, alpha = 1  # solid color for actual data
+  ) +
+  geom_point(
+    aes(y = predicted_income_per_person, color = category),
+    size = 3, alpha = 0.4, shape = 16  # same color, more transparent for predicted
+  ) +
+  coord_flip() +
+  labs(
+    x = "County",
+    y = "Income Per Person",
+    color = "Family Size"
+  ) +
+  theme_minimal()
 ```
+
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+![](c09-income-assignment_files/figure-gfm/q8-task-1.png)<!-- -->
+
+``` r
+df_plot %>%
+  filter(category != "2-person families") %>%
+  ggplot(aes(x = fct_reorder(county, difference), y = difference, fill = category)) +
+  geom_col(position = position_dodge(width = 0.8)) +
+  coord_flip() +
+  labs(
+    x = "County",
+    y = "Difference: Actual - Predicted Income Per Person",
+    fill = "Family Size"
+  ) +
+  theme_minimal()
+```
+
+    ## Warning: `fct_reorder()` removing 2 missing values.
+    ## ℹ Use `.na_rm = TRUE` to silence this message.
+    ## ℹ Use `.na_rm = FALSE` to preserve NAs.
+
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_col()`).
+
+![](c09-income-assignment_files/figure-gfm/q8-task-2.png)<!-- -->
+
+``` r
+df_plot <- df_q3 %>%
+  filter(str_detect(geographic_area_name, "Massachusetts")) %>%
+  mutate(
+    county = str_remove(geographic_area_name, " County,.*$"),
+    family_size = as.numeric(str_extract(category, "^\\d+")),
+    income_per_person = income_estimate / family_size,
+    income_per_earner = income_per_person * family_size / 2  # what each of 2 earners must earn
+  ) %>%
+  mutate(
+    county = fct_reorder(county, income_per_earner)
+  )
+```
+
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `county = fct_reorder(county, income_per_earner)`.
+    ## Caused by warning:
+    ## ! `fct_reorder()` removing 2 missing values.
+    ## ℹ Use `.na_rm = TRUE` to silence this message.
+    ## ℹ Use `.na_rm = FALSE` to preserve NAs.
+
+``` r
+ggplot(df_plot, aes(x = as.factor(family_size), y = income_per_earner, fill = category)) +
+  geom_boxplot(alpha = 0.6, outlier.shape = NA) +
+  labs(
+    x = "Family Size",
+    y = "Implied Income per Earner (Assuming 2 Earners)",
+    fill = "Family Size"
+  ) +
+  theme_minimal()
+```
+
+    ## Warning: Removed 2 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+![](c09-income-assignment_files/figure-gfm/q9-1.png)<!-- -->
 
 **Observations**:
 
-- Document your observations here
+- I tried to deal with the data to clean up the data to get the the
+  numbers for how many 2 3 4 5 6 person households are there so i can do
+  something about the most common family size. However the column names
+  is really confusing and I spent too much time wrangling with the data.
+- So I decided to work with the data I currently have and figure out the
+  income per person based on family size.
+- except for berkshire and barnstable, all counties follow the pattern
+  of less people in the household means more income per person. This is
+  expected because I expect that there are only 2 or less earners in a
+  family and the rest are just children whos income is 0.
+- I then used the 2 person median income as a baseline to compare
+  predicted income if 2 people income was shared based on the assumption
+  of all families only has 2 earners. Except for the 3 person families
+  in Nantucket, all actual income per person data exceeds the predicted.
+- This is interesting and my hypothesis is that 1, people with children
+  are older and the 2 person family are younger and/or too broke to have
+  child, and 2, this somewhat proves that people has to feel somewhat
+  financially comfortable to have child and assuming that there are only
+  2 earners regardless of size of household, they have to earn more.
+- I then merge the counties and plotted using whisker plot (to include
+  the county variation) to see what the average earner income in a
+  family and categorized by family size.
+- We can see that the bigger the family size is, the higher the median
+  earners earn. This raises the question of does having a child pushes
+  parents to strive for career advances because they felt the need to
+  provide for their child, or is this just a natural occurrences as
+  people gets older and they naturally gets career advancements
+  regardless of if they have children or not. And this relationship we
+  see in this graph is just due to an age factor.
 
 Ideas:
 
