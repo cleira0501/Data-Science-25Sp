@@ -738,8 +738,7 @@ df_data %>%
   - Not super, they are closely clustered together and the range in each
     categories are quite narrow.
 - Which counties have the widest confidence intervals?
-  - I thought they all have 99% confidence interval so I would say the
-    same?
+  - nantucket, dukes, Hampshire, berkshire
 
 In the next task you’ll investigate the relationship between population
 and uncertainty.
@@ -752,8 +751,16 @@ and uncertainty.
 ``` r
 df_data %>%
   ggplot(aes(population_estimate,income_SE)) +
-  geom_point(alpha = 0.2) 
+  geom_point(alpha = 0.2) +
+  scale_x_log10()+
+  scale_y_log10()+
+  geom_smooth()
 ```
+
+    ## `geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
+
+    ## Warning: Removed 814 rows containing non-finite outside the scale range
+    ## (`stat_smooth()`).
 
     ## Warning: Removed 814 rows containing missing values or values outside the scale range
     ## (`geom_point()`).
@@ -766,9 +773,12 @@ df_data %>%
   this trend exist?
   - the bigger the population size is, the smaller the income standard
     error. This makes sense because standard error is directly
-    influenced by sample size(population), and when the population is
-    big, the median values are less prone to be influenced by the
-    outliers and the extremeties.
+    influenced by sample size when the sample size is directly
+    correlated to population(let’s say we take 10% of households in each
+    counties as our sample), then when the population is big, the median
+    values are less prone to be influenced by the outliers and the
+    extremeties since one data point doesn’t have that big of an
+    influence on the median.
 - What does this *overall* trend tell you about the relative ease of
   studying small vs large counties?
   - Smaller counties with smaller populations may have more significant
